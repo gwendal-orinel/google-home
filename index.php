@@ -3,7 +3,7 @@ $content = trim(file_get_contents("php://input"));
 $decoded = json_decode($content, true);
 $intent= $decoded["queryResult"]["action"];
 
-$url="https://api.thingspeak.com/channels/526367/feeds.json?api_key=APIKEY&results=1";
+$url="https://api.thingspeak.com/channels/526367/feeds.json?api_key=NJV1J5WTMBJ4YB3D&results=1";
 $result = file_get_contents($url);
 $data=json_decode($result, true);
 $hum=round($data["feeds"]["0"]["field1"],0);
