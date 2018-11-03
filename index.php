@@ -28,32 +28,40 @@ if($context == "aquarium1"){
 	}
 }
 if($context == "pipeline"){
-	// Folio
-	if($intent == "pipeline.folio.deploy"){
-		$action='update-webhook';
-		$textresponse = "Je viens de lancer le déploiement";
+	// Deploy
+	$action='';
+	if($intent == "pipeline.deploy"){
+		$name=$decoded["queryResult"]["parameters"]["name"];
+		$confirm=$decoded["queryResult"]["parameters"]["confirm"];
+		if($confirm == "oui"){ 
+			if($name == "webhook"){
+				$action='update-webhook';
+				$textresponse = "Je viens de lancer le déploiement du serveur ".$name;
+			}
+			if($name == "proxy"){
+				$action='update';
+				$textresponse = "Je viens de lancer le déploiement du serveur ".$name;
+			}
+		}else{
+			$textresponse = "J'annule le déploiement";	
+		}
 	}
-	if($intent == "pipeline.services-cloud"){
-		$action='update';
-		$textresponse = "Je viens de lancer le déploiement";
+	if($confirm == "oui"){
+		$url="https://gitlab.com/api/v4/projects/8641028/trigger/pipeline";
+		$postdata = http_build_query(array(
+			'token' => '400b1e0c0ffbdac008c06da4c9d370',
+			'variables[CI_COMMIT_MESSAGE]' => $action,
+			'ref' => 'master',
+		    ));
+		$opts = array('http' =>
+		    array(
+			'method'  => 'POST',
+			'header'  => 'Content-type: application/x-www-form-urlencoded',
+			'content' => $postdata
+		    ));
+		$body  = stream_context_create($opts);
+		$result = file_get_contents($url, false, $body);
 	}
-	
-	
-	$url="https://gitlab.com/api/v4/projects/8641028/trigger/pipeline";
-	$postdata = http_build_query(array(
-		'token' => '400b1e0c0ffbdac008c06da4c9d370',
-		'variables[CI_COMMIT_MESSAGE]' => $action,
-		'ref' => 'master',
-	    ));
-	$opts = array('http' =>
-	    array(
-		'method'  => 'POST',
-		'header'  => 'Content-type: application/x-www-form-urlencoded',
-		'content' => $postdata
-	    ));
-	$body  = stream_context_create($opts);
-	$result = file_get_contents($url, false, $body);
-
 }
 $dataresponse = array("fulfillmentText" => $textresponse);
 echo json_encode($dataresponse);
