@@ -3,7 +3,7 @@ $content = trim(file_get_contents("php://input"));
 $decoded = json_decode($content, true);
 $intent= $decoded["queryResult"]["action"];
 
-$context = explode("", $intent)[0];
+$context = explode(".", $intent)[0];
 if($context == "aquarium1"){
 	// Aquarium
 	$url="https://api.thingspeak.com/channels/526367/feeds.json?api_key=NJV1J5WTMBJ4YB3D&results=1";
