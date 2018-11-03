@@ -35,7 +35,7 @@ if($context == "pipeline"){
 		$confirm=$decoded["queryResult"]["parameters"]["confirm"];
 		if($confirm == "oui"){ 
 			if($name == "webhook"){ $action='update-webhook'; }
-			if($name == "porte-folio"){ $action='update-folio'; }
+			if($name == "port-folio"){ $action='update-folio'; }
 			if($name == "proxy"){ $action='update'; }
 			$textresponse = "Je viens de lancer le déploiement du serveur ".$name;
 		}else{
