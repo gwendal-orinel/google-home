@@ -30,15 +30,29 @@ if($context == "aquarium1"){
 if($context == "pipeline"){
 	// Folio
 	if($intent == "pipeline.folio.deploy"){
-		$url="https://gitlab.example.com/api/v4/projects/8641028/ref/master/trigger/pipeline?token=400b1e0c0ffbdac008c06da4c9d370&variables[CI_COMMIT_MESSAGE]=update-folio";
+		$action='update-webhook';
 		$textresponse = "Je viens de lancer le déploiement";
 	}
 	if($intent == "pipeline.services-cloud"){
-		$url="https://gitlab.example.com/api/v4/projects/8641028/ref/master/trigger/pipeline?token=400b1e0c0ffbdac008c06da4c9d370&variables[CI_COMMIT_MESSAGE]=update";
+		$action='update';
 		$textresponse = "Je viens de lancer le déploiement";
 	}
 	
-	$result = file_get_contents($url, false, '');
+	
+	$url="https://gitlab.com/api/v4/projects/8641028/trigger/pipeline";
+	$postdata = http_build_query(array(
+		'token' => '400b1e0c0ffbdac008c06da4c9d370',
+		'variables[CI_COMMIT_MESSAGE]' => $action,
+		'ref' => 'master',
+	    ));
+	$opts = array('http' =>
+	    array(
+		'method'  => 'POST',
+		'header'  => 'Content-type: application/x-www-form-urlencoded',
+		'content' => $postdata
+	    ));
+	$body  = stream_context_create($opts);
+	$result = file_get_contents($url, false, $body);
 
 }
 $dataresponse = array("fulfillmentText" => $textresponse);
