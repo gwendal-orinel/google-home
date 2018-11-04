@@ -56,11 +56,15 @@ if($context == "pipeline"){
 			$result = file_get_contents($url, false, $body);
 		}
 	}
-	if($intent == "pipeline.status"){
+	if(($intent == "pipeline.status") || ($intent == "pipeline.status.time")){
 		$url="https://gitlab.com/api/v4/projects/8641028/pipelines";
-		$headers = array('http' => array('PRIVATE-TOKEN' => 'YqxpTxssU1LXtbsU5hzo'));
-		$headers2 = stream_context_create($headers);
-		$result = file_get_contents($url,false,$headers2);
+		$opts = array('http' =>
+                            array(
+                                'method'  => 'GET',
+                                'header'  => 'PRIVATE-TOKEN: YqxpTxssU1LXtbsU5hzo'
+                            ));
+		$headers = stream_context_create($opts);
+		$result = file_get_contents($url, false, $headers);
 		$data=json_decode($result, true);
 		$status=$data[0]["status"];
 		$id=$data[0]["id"];
@@ -72,14 +76,12 @@ if($context == "pipeline"){
 
 		if($intent == "pipeline.status.time"){
 			$url="https://gitlab.com/api/v4/projects/8641028/pipelines/".$id;
-			$headers = array('http' => array('PRIVATE-TOKEN' => 'YqxpTxssU1LXtbsU5hzo'));
-			$headers2 = stream_context_create($headers);
-			$result = file_get_contents($url,false,$headers2);
+			$result = file_get_contents($url, false, $headers);
 			$data=json_decode($result, true);
-			$status=$data[0]["status"];
-			$user=$data[0]["user"]["name"];
-			$duration=$data[0]["duration"];
-			$textresponse="Le dernier déploiement a été initié par ".$user." il a duré ".$duration." et s'est terminé avec le status ".$status;
+			$status=$data["status"];
+			$user=$data["user"]["name"];
+			$duration=$data["duration"];
+			$textresponse="Le dernier déploiement a été initié par ".$user.", il a duré ".gmdate("i",$duration)." minutes et ".gmdate("s",$duration)." secondes et s'est terminé avec le status ".$status;
 		}
 	}
 }
