@@ -28,9 +28,7 @@ if($context == "aquarium1"){
 	}
 }
 if($context == "pipeline"){
-	// Deploy
-	$action='';
-	if($intent == "pipeline.deploy"){
+	if($intent == "pipeline.deploy"){ // Deploy
 		$name=$decoded["queryResult"]["parameters"]["name"];
 		$confirm=$decoded["queryResult"]["parameters"]["confirm"];
 		if($confirm == "oui"){ 
@@ -41,22 +39,48 @@ if($context == "pipeline"){
 		}else{
 			$textresponse = "J'annule le déploiement";	
 		}
+		if($confirm == "oui"){
+			$url="https://gitlab.com/api/v4/projects/8641028/trigger/pipeline";
+			$postdata = http_build_query(array(
+				'token' => '400b1e0c0ffbdac008c06da4c9d370',
+				'variables[CI_COMMIT_MESSAGE]' => $action,
+				'ref' => 'master',
+			    ));
+			$opts = array('http' =>
+			    array(
+				'method'  => 'POST',
+				'header'  => 'Content-type: application/x-www-form-urlencoded',
+				'content' => $postdata
+			    ));
+			$body  = stream_context_create($opts);
+			$result = file_get_contents($url, false, $body);
+		}
 	}
-	if($confirm == "oui"){
-		$url="https://gitlab.com/api/v4/projects/8641028/trigger/pipeline";
-		$postdata = http_build_query(array(
-			'token' => '400b1e0c0ffbdac008c06da4c9d370',
-			'variables[CI_COMMIT_MESSAGE]' => $action,
-			'ref' => 'master',
-		    ));
-		$opts = array('http' =>
-		    array(
-			'method'  => 'POST',
-			'header'  => 'Content-type: application/x-www-form-urlencoded',
-			'content' => $postdata
-		    ));
-		$body  = stream_context_create($opts);
-		$result = file_get_contents($url, false, $body);
+	if($intent == "pipeline.status"){
+		$url="https://gitlab.com/api/v4/projects/8641028/pipelines";
+		$headers = array('http' => array('PRIVATE-TOKEN' => 'YqxpTxssU1LXtbsU5hzo'));
+		$headers2 = stream_context_create($headers);
+		$result = file_get_contents($url,false,$headers2);
+		$data=json_decode($result, true);
+		$status=$data[0]["status"];
+		$id=$data[0]["id"];
+		$textresponse='Le status du déploiement est inconnu';
+		if($status == "success"){ $textresponse = "Le déploiement s'est terminé avec succès !"; }
+		if($status == "failed"){ $textresponse = "Le déploiement a échoué !"; }
+		if($status == "running"){ $textresponse = "Le déploiement est en cours !"; }
+		if($status == "pending"){ $textresponse = "Le déploiement est en attente, il va démarrer dans quelques instants"; }
+
+		if($intent == "pipeline.status.time"){
+			$url="https://gitlab.com/api/v4/projects/8641028/pipelines/".$id;
+			$headers = array('http' => array('PRIVATE-TOKEN' => 'YqxpTxssU1LXtbsU5hzo'));
+			$headers2 = stream_context_create($headers);
+			$result = file_get_contents($url,false,$headers2);
+			$data=json_decode($result, true);
+			$status=$data[0]["status"];
+			$user=$data[0]["user"]["name"];
+			$duration=$data[0]["duration"];
+			$textresponse="Le dernier déploiement a été initié par ".$user." il a duré ".$duration." et s'est terminé avec le status ".$status;
+		}
 	}
 }
 $dataresponse = array("fulfillmentText" => $textresponse);
