@@ -42,7 +42,7 @@ if($context == "pipeline"){
 		if($confirm == "oui"){
 			$url="https://gitlab.com/api/v4/projects/8641028/trigger/pipeline";
 			$postdata = http_build_query(array(
-				'token' => '400b1e0c0ffbdac008c06da4c9d370',
+				'token' => 'TOKEN-DEPLOY',
 				'variables[CI_COMMIT_MESSAGE]' => $action,
 				'ref' => 'master',
 			    ));
@@ -61,7 +61,7 @@ if($context == "pipeline"){
 		$opts = array('http' =>
                             array(
                                 'method'  => 'GET',
-                                'header'  => 'PRIVATE-TOKEN: YqxpTxssU1LXtbsU5hzo'
+                                'header'  => 'PRIVATE-TOKEN: TOKEN-STATUS'
                             ));
 		$headers = stream_context_create($opts);
 		$result = file_get_contents($url, false, $headers);
